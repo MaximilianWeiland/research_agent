@@ -39,7 +39,7 @@ if user_input := st.chat_input("Ask a research question..."):
 
     with st.chat_message("assistant"):
         with st.spinner("Thinking..."):
-            # send full conversation history to the agent
+            # send full conversation history to the agent and run the agent
             result = agent.invoke({"messages": st.session_state.messages})
             response = result["messages"][-1].content
 
@@ -50,6 +50,7 @@ if user_input := st.chat_input("Ask a research question..."):
                 for tc in msg.tool_calls:
                     tool_calls.append(tc["name"])
 
+        # display tool usage
         if tool_calls:
             with st.expander(f"Tools used: {', '.join(tool_calls)}"):
                 for name in tool_calls:

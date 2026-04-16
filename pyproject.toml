@@ -15,4 +15,6 @@ dependencies = [
     "arxiv",
     "chromadb",
     "pypdf",
+    "youtube-transcript-api>=1.2.4",
+    "langchain-chroma>=1.1.0",
 ]
