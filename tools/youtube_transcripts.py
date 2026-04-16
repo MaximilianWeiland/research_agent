@@ -37,7 +37,7 @@ def get_youtube_tool():
 
     @tool
     def get_youtube_transcript(query: str) -> str:
-        """Search YouTube for a video that matches a query and return its transcript."""
+        """Search YouTube for a video that matches a query and return its transcript alongside the video url."""
         results = search.invoke(f"site:youtube.com/watch {query}")
 
         video_ids = []
