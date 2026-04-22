@@ -4,6 +4,7 @@ from langchain_openai import OpenAIEmbeddings
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_chroma import Chroma
+import sys, os; sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 from config.settings import DOCS_DIR, DB_DIR
 from dotenv import load_dotenv
 load_dotenv()

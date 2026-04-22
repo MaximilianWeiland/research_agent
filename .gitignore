@@ -1,3 +1,18 @@
-__pycache__
+# environment
 .env
+.venv
+
+# python
+__pycache__
+*.pyc
+*.pyo
+
+# mac
 .DS_Store
+
+# data
+data/
+docs/
+
+# aws
+*.pem
