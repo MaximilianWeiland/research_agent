@@ -44,6 +44,8 @@ uv run python indexing/build_index.py
 uv run streamlit run app.py
 ```
 
+The app is always available at **http://localhost:8501**. The URL shown in the terminal may display the production EC2 address — ignore it when running locally.
+
 ## Deployment
 
 The app is containerized and deployed on AWS:
