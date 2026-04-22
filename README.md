@@ -1,6 +1,6 @@
 # Research Agent
 
-A conversational research assistant built with LangChain, LangGraph, and Streamlit. The agent answers questions about research topics using a combination of RAG over indexed papers and external tools.
+A conversational research assistant built with LangChain, LangGraph, and Streamlit. The agent answers questions about research topics by enriching its context information with relevant paragraphs from original research papers and by retrieving data from further external web sources.
 
 ## Features
 
@@ -10,24 +10,6 @@ A conversational research assistant built with LangChain, LangGraph, and Streaml
 - Wikipedia search
 - YouTube transcript retrieval
 - Conversation history persisted in PostgreSQL via LangGraph checkpointing
-
-## Project Structure
-
-```
-research_agent/
-├── src/
-│   ├── agent/          # LangGraph agent and system prompt
-│   ├── checkpointing/  # PostgreSQL conversation persistence
-│   ├── config/         # Settings and secrets loading
-│   ├── rag/            # Vector store setup
-│   └── tools/          # Agent tools
-├── indexing/           # Script to build the vector index from PDFs
-├── data/               # ChromaDB vector store (not committed)
-├── docs/               # Source PDF papers (not committed)
-├── app.py              # Streamlit entry point
-├── Dockerfile
-└── docker-compose.yml
-```
 
 ## Local Development
 
@@ -52,7 +34,7 @@ DATABASE_URL=postgresql://postgres:postgres@localhost:5432/research_agent
 docker compose up -d
 ```
 
-**4. Build the vector index** (requires PDFs in `docs/`)
+**4. Build the vector index** (requires PDFs of the desired research papers in `docs/`)
 ```
 uv run python indexing/build_index.py
 ```
@@ -71,7 +53,7 @@ The app is containerized and deployed on AWS:
 - **RDS** — managed PostgreSQL for conversation history
 - **Secrets Manager** — stores API keys
 
-**Build and push image (Apple Silicon):**
+**Build and push image:**
 ```
 docker buildx build --platform linux/amd64 -t research-agent .
 docker tag research-agent:latest <ECR_URI>:latest
