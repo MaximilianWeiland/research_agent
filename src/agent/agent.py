@@ -10,8 +10,8 @@ from tools.wikipedia_search import get_wikipedia_tool
 from agent.prompt import SYSTEM_PROMPT
 
 
-def build_agent(checkpointer: Checkpointer | None = None):
-    model = ChatOpenAI(model="gpt-4o")
+def build_agent(checkpointer: Checkpointer | None = None, model: str = "gpt-4o", temperature: float = 1.0):
+    llm = ChatOpenAI(model=model, temperature=temperature)
     vector_store = get_vectorstore()
 
     tools = [
@@ -22,4 +22,4 @@ def build_agent(checkpointer: Checkpointer | None = None):
         get_wikipedia_tool()
     ]
 
-    return create_agent(model, tools, system_prompt=SYSTEM_PROMPT, checkpointer=checkpointer)
+    return create_agent(llm, tools, system_prompt=SYSTEM_PROMPT, checkpointer=checkpointer)

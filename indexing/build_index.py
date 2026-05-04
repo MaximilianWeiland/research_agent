@@ -69,11 +69,10 @@ def build_index():
         persist_directory=str(DB_DIR),
     )
 
-    vector_store.persist()
+
     print(f"Index saved to {DB_DIR}")
 
 
-# ---- Incremental Update (Optional but Powerful) ----
 def update_index():
     """
     Only re-embed changed files instead of rebuilding everything.
@@ -93,7 +92,7 @@ def update_index():
 
     print("Adding documents (incremental)...")
     vector_store.add_documents(splits)
-    vector_store.persist()
+
 
     print("Index updated.")
 
