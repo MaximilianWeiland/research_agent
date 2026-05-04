@@ -4,7 +4,7 @@ A conversational research assistant built with LangChain, LangGraph, and Streaml
 
 ![Research Agent Screenshot](imgs/research_agent_screenshot.png)
 
-## Features
+## Main Features
 
 - RAG over a local collection of research papers (ChromaDB vector store).
 - Web search via Tavily
@@ -12,6 +12,11 @@ A conversational research assistant built with LangChain, LangGraph, and Streaml
 - Wikipedia search
 - YouTube transcript retrieval
 - Conversation history persisted in PostgreSQL via LangGraph checkpointing
+
+## Specifics
+- RAG is always prioritized in the search for an answer. Only if user explicitly asks for it, or if the vectorstore does not hold a respective paper, does the agent use other tools.
+- ArXiv search retrieves papers with a match of the agent's query and the paper's title. Papers are returned sorted by citation count. The entire paper is subsequently added to the vectorstore to make the ArXiv search irrelevant for the next time.
+- Each unique browser session gets assigned its own session_id according to which the conversation history is saved via PostGres. I also added LangSmith tracing. This can further be extended/exchanged by e.g. Langfuse.
 
 ## Local Development
 
