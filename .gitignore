@@ -13,7 +13,6 @@ __pycache__
 # data
 data/
 docs/
-*.png
 
 # aws
 *.pem

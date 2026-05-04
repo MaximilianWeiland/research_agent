@@ -2,7 +2,7 @@
 
 A conversational research assistant built with LangChain, LangGraph, and Streamlit. The agent answers questions about research topics by enriching its context information with relevant paragraphs from original research papers and by retrieving data from further external web sources. Allows for changing the model and its temperature as well as adding new papers to the vector store directly through the Streamlit UI.
 
-![Research Agent Screenshot](research_agent_screenshot.png)
+![Research Agent Screenshot](imgs/research_agent_screenshot.png)
 
 ## Features
 
