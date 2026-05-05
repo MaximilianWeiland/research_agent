@@ -5,6 +5,7 @@ import io
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "src"))
 import streamlit as st
 from dotenv import load_dotenv
+from openai import BadRequestError
 from langchain_core.messages import HumanMessage, AIMessage
 from config.secrets import load_secrets
 
@@ -30,6 +31,13 @@ with st.sidebar:
     model = st.selectbox("Model", ["gpt-4o", "gpt-4o-mini", "gpt-4.1"])
     temperature = st.slider("Temperature", 0.0, 2.0, 1.0, 0.1)
     st.caption(f"Active: {model} · temp {temperature}")
+
+    st.divider()
+
+    if st.button("New Conversation", use_container_width=True):
+        st.session_state.thread_id = str(uuid.uuid4())
+        st.session_state.messages = []
+        st.rerun()
 
     st.divider()
 
@@ -96,7 +104,17 @@ if user_input := st.chat_input("Ask a research question..."):
     with st.chat_message("assistant"):
         with st.spinner("Thinking..."):
             config = {"configurable": {"thread_id": st.session_state.thread_id}}
-            result = get_agent(model, temperature).invoke({"messages": [human_msg]}, config=config)
+            try:
+                result = get_agent(model, temperature).invoke({"messages": [human_msg]}, config=config)
+            except BadRequestError as e:
+                if "tool_call_id" in str(e):
+                    # checkpoint is corrupted (interrupted mid-tool-call); reset thread and retry
+                    st.session_state.thread_id = str(uuid.uuid4())
+                    st.session_state.messages = [human_msg]
+                    config = {"configurable": {"thread_id": st.session_state.thread_id}}
+                    result = get_agent(model, temperature).invoke({"messages": [human_msg]}, config=config)
+                else:
+                    raise
             response = result["messages"][-1].content
 
         # collect tool calls from messages after the last human message only
