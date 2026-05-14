@@ -18,8 +18,7 @@ st.title("Research Agent")
 @st.cache_resource
 def get_agent(model: str, temperature: float):
     load_secrets()
-    from agent.agent import build_agent
-    from checkpointing.checkpointer import get_checkpointer
+    from agent.agent import build_agent, get_checkpointer
     checkpointer = get_checkpointer()
     return build_agent(checkpointer=checkpointer, model=model, temperature=temperature)
 
