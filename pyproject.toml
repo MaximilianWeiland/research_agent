@@ -21,4 +21,5 @@ dependencies = [
     "langgraph-checkpoint-postgres",
     "psycopg[binary]",
     "boto3",
+    "langfuse>=2.0.0",
 ]

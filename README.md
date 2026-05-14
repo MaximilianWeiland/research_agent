@@ -2,6 +2,8 @@
 
 A conversational research assistant built with LangChain, LangGraph, and Streamlit. The agent answers questions about research topics by enriching its context information with relevant paragraphs from original research papers and by retrieving data from further external web sources. Allows for changing the model and its temperature as well as adding new papers to the vector store directly through the Streamlit UI.
 
+The agent's responses are evaluated on relevance, faithfulness and conciseness by another LLM via the LLM-as-a-judge concept. The scores on these criteria as well as the general traces to all tool calls and model answers are tracked on Langfuse.
+
 ![Research Agent Screenshot](imgs/research_agent_screenshot.png)
 
 ## Main Features
@@ -12,11 +14,13 @@ A conversational research assistant built with LangChain, LangGraph, and Streaml
 - Wikipedia search
 - YouTube transcript retrieval
 - Conversation history persisted in PostgreSQL via LangGraph checkpointing
+- LLM-as-a-judge evaluation on answer relevance, faithfulness and conciseness
 
 ## Specifics
 - RAG is always prioritized in the search for an answer. Only if user explicitly asks for it, or if the vectorstore does not hold a respective paper, does the agent use other tools.
 - ArXiv search retrieves papers with a match of the agent's query and the paper's title. Papers are returned sorted by citation count. The entire paper is subsequently added to the vectorstore to make the ArXiv search irrelevant for the next time.
-- Each unique browser session gets assigned its own session_id according to which the conversation history is saved via PostGres. I also added LangSmith tracing. This can further be extended/exchanged by e.g. Langfuse.
+- Each unique browser session gets assigned its own session_id according to which the conversation history is saved via PostGres.
+- All model inputs, generations and tool calls are traced via Langfuse. LLM evaluation scores per model response are also saved there.
 
 ## Local Development
 
@@ -31,8 +35,9 @@ Create a `.env` file:
 ```
 OPENAI_API_KEY=...
 TAVILY_API_KEY=...
-LANGSMITH_API_KEY=...
-LANGSMITH_TRACING=true
+LANGFUSE_SECRET_KEY=...
+LANGFUSE_PUBLIC_KEY=...
+LANGFUSE_HOST=https://cloud.langfuse.com
 DATABASE_URL=postgresql://postgres:postgres@localhost:5432/research_agent
 ```
 

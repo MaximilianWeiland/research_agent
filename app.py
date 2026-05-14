@@ -6,7 +6,8 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "src"))
 import streamlit as st
 from dotenv import load_dotenv
 from openai import BadRequestError
-from langchain_core.messages import HumanMessage, AIMessage
+from langchain_core.messages import HumanMessage, AIMessage, ToolMessage
+from langfuse.langchain import CallbackHandler as LangfuseCallbackHandler
 from config.secrets import load_secrets
 
 load_dotenv()
@@ -51,7 +52,7 @@ with st.sidebar:
         from config.settings import DOCS_DIR
 
         splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200, add_start_index=True)
-         # instantiate a new vectorstore object
+        # instantiate a new vectorstore object
         # important: agent points to the same vs url, so it can directly refer to new pdfs
         vs = get_vectorstore()
 
@@ -102,7 +103,12 @@ if user_input := st.chat_input("Ask a research question..."):
     # call agent which then runs in a loop
     with st.chat_message("assistant"):
         with st.spinner("Thinking..."):
-            config = {"configurable": {"thread_id": st.session_state.thread_id}}
+            # instantiate a Langfuse hook to listen to new events
+            langfuse_handler = LangfuseCallbackHandler()
+            config = {
+                "configurable": {"thread_id": st.session_state.thread_id},
+                "callbacks": [langfuse_handler],
+            }
             try:
                 result = get_agent(model, temperature).invoke({"messages": [human_msg]}, config=config)
             except BadRequestError as e:
@@ -110,13 +116,16 @@ if user_input := st.chat_input("Ask a research question..."):
                     # checkpoint is corrupted (interrupted mid-tool-call); reset thread and retry
                     st.session_state.thread_id = str(uuid.uuid4())
                     st.session_state.messages = [human_msg]
-                    config = {"configurable": {"thread_id": st.session_state.thread_id}}
+                    config = {
+                        "configurable": {"thread_id": st.session_state.thread_id},
+                        "callbacks": [langfuse_handler],
+                    }
                     result = get_agent(model, temperature).invoke({"messages": [human_msg]}, config=config)
                 else:
                     raise
             response = result["messages"][-1].content
 
-        # collect tool calls from messages after the last human message only
+        # collect tool calls and retrieved context from messages after the last human message
         all_messages = result["messages"]
         last_human_idx = max(i for i, m in enumerate(all_messages) if isinstance(m, HumanMessage))
         tool_calls = [
@@ -125,6 +134,14 @@ if user_input := st.chat_input("Ask a research question..."):
             if hasattr(msg, "tool_calls")
             for tc in msg.tool_calls
         ]
+        retrieved_context = "\n\n".join(
+            m.content for m in all_messages[last_human_idx:] if isinstance(m, ToolMessage)
+        )
+
+        # run LLM-as-a-judge evaluation for every new human input
+        if langfuse_handler.last_trace_id:
+            from eval.evaluator import evaluate_async
+            evaluate_async(langfuse_handler.last_trace_id, user_input, response, retrieved_context)
 
         # display the selected tools and the final text response
         if tool_calls:
